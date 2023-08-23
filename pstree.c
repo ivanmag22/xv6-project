@@ -9,27 +9,27 @@ main(int argc, char *argv[])
 {
   int i,pid,sz,len;
   char name[16];
-  struct pstat ps;
+  struct pfam pf;
 
   if(argc < 1){
     printf(1, "No arguments!\n");
   }
   else
   {
-    getprocinfo(&ps);
+    gettree(&pf);
     if(argc==1)
     {
-      printf(1,"PID\t|\tName\t|\tSize\n");
-      len = ps.length;
+      printf(1,"PID\t|\tName\t|\tParent PID\n");
+      len = pf.length;
       for(i=0;i<len;i++)
       {
-        pid = ps.pid[i];
-        strcpy(name,ps.name[i]);
-        sz = ps.sz[i];
+        pid = pf.pid;
+        strcpy(name,pf.name);
+        sz = pf.parent;
         printf(1,"%d\t|\t%s\t|\t%d\n",pid,name,sz);
       }
     }
-    else if(argc==2)
+    /*else if(argc==2)
     {
       pid = atoi(argv[1]);
       if(pid<1 || pid>NPROC)
@@ -50,7 +50,7 @@ main(int argc, char *argv[])
         }
       }
       printf(2,"Error: No Process for this PID\n");
-    }
+    }*/
   }
 
   exit();

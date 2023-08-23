@@ -10,6 +10,7 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct pstat;
+struct pfam;
 
 // bio.c
 void            binit(void);
@@ -122,6 +123,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             getprocinfo(struct pstat*);
+int             getproctree(struct pfam*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
