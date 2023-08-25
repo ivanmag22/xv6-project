@@ -104,9 +104,9 @@ sys_getprocinfo(void)
 int
 sys_getproctree(void)
 {
-  struct pfam *d;
+  /*struct pfam *d;
   if (argptr(0, (char **)&d, sizeof(struct pfam)) < 0)
-      return -1;
-  getproctree(d);
+      return -1;*/
+  getproctree();
   return 0;
 }

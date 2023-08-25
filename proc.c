@@ -587,12 +587,47 @@ walk(struct pfam *pf,struct proc *p,int *flag){
 }
 
 int
-getproctree(struct pfam* pf){
-  int i,j,zero;
-  struct proc *p;
+getproctree(void){
+  int i,j,v[NPROC];
+  struct proc p;
 
   acquire(&ptable.lock);
 
+  for(i=NPROC-1; i>0;i--){
+    if(ptable.proc[i].pid>NPROC)
+    {
+      v[i]=-1;
+      continue;
+    }
+    if(v[i]==1)
+    {
+      continue;
+    }
+    p = ptable.proc[i];
+    v[i] = 1;
+    if(p.state != UNUSED)
+    {
+      cprintf("[PID: %d Name: %s]\t<-\t",p.pid,p.name);
+      for(j=i-1;j>=0;j--)
+      {
+        if(ptable.proc[j].state != UNUSED && ptable.proc[j].pid == p.parent->pid && v[j]!=1)
+        {
+          cprintf("[PID: %d Name: %s]\t",ptable.proc[j].pid,ptable.proc[j].name);
+          if(ptable.proc[j].pid != 1)
+          {
+            cprintf("<-\t");
+          }
+          else
+          {
+            cprintf("\n");
+          }
+          p = ptable.proc[j];
+          v[j] = 1;
+        }
+      }
+    }
+  }
+  /*
   //init
   p = ptable.proc;
 
@@ -604,21 +639,15 @@ getproctree(struct pfam* pf){
   for(i=0,j=0,zero=0; p < &ptable.proc[NPROC]; p++,i++,zero=0){//p++ -> p(struct proc OLD) + sizeof(struct proc) -> p (struct proc NEW)
     if(p->state != UNUSED)
     {
-      /*if(strncmp(p->name,"pstree",6)==0)
-      {
-        cprintf("verificare funzionamento\n");
-      }
-      else
-      {
-        walk(pf,p,&zero);
-      }*/
-      walk(pf,p,&zero);
+      //walk(pf,p,&zero);
+      walktree(ptable.proc,p);
       j++;
       cprintf("for() - pf->pid: %d, pf->name: %s\tj: %d\n",pf->pid,pf->name,j);
     }
   }
   cprintf("j: %d\n",j);
   pf->length = j;
+  */
   release(&ptable.lock);
   return 0;
 }
