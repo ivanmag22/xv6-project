@@ -19,7 +19,7 @@ struct pfam {
   struct pfam *children[NPROC];
   int n_ch;
   int length;
-}
+};
 
 //#endif
 //vedi se necessario il costrutto condizionale

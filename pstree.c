@@ -4,6 +4,24 @@
 #include "param.h"
 #include "processInfo.h"
 
+void
+printwalk(struct pfam *pf){
+  int i;
+  printf(1,"prova\n");
+  if(pf->n_ch == 0)
+  {
+    printf(1,"%d\t|\t%s\t|\t%d\n",pf->pid,pf->name,pf->parent);
+
+    return;
+  }
+
+  for(i=0;i<pf->n_ch;i++)
+  {
+    printf(1,"%d\t|\t%s\t|\t%d\n",pf->pid,pf->name,pf->parent);
+    printwalk(pf->children[i]);
+  }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -16,18 +34,25 @@ main(int argc, char *argv[])
   }
   else
   {
-    gettree(&pf);
+    getproctree(&pf);
     if(argc==1)
     {
       printf(1,"PID\t|\tName\t|\tParent PID\n");
-      len = pf.length;
+      printwalk(&pf);
+      i=0;
+      pid=0;
+      sz=0;
+      len=0;
+      strcpy(name,"");
+      printf(1,"%d\t|\t%s\t|\t%d\t%d\t%d\n",pid,name,sz,i,len);
+      /*len = pf.length;
       for(i=0;i<len;i++)
       {
         pid = pf.pid;
         strcpy(name,pf.name);
         sz = pf.parent;
         printf(1,"%d\t|\t%s\t|\t%d\n",pid,name,sz);
-      }
+      }*/
     }
     /*else if(argc==2)
     {
