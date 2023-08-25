@@ -588,7 +588,7 @@ walk(struct pfam *pf,struct proc *p,int *flag){
 
 int
 getproctree(void){
-  int i,j,v[NPROC];
+  int i,j;//,v[NPROC];
   struct proc p;
 
   acquire(&ptable.lock);
