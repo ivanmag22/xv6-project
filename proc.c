@@ -596,13 +596,13 @@ getproctree(void){
   for(i=NPROC-1; i>0;i--){
     if(ptable.proc[i].pid>NPROC)
     {
-      v[i]=-1;
+      //v[i]=-1;
       continue;
     }
-    if(v[i]==1)
+    /*if(v[i]==1)
     {
       continue;
-    }
+    }*/
     p = ptable.proc[i];
     v[i] = 1;
     if(p.state != UNUSED)
@@ -622,7 +622,7 @@ getproctree(void){
             cprintf("\n");
           }
           p = ptable.proc[j];
-          v[j] = 1;
+          //v[j] = 1;
         }
       }
     }
