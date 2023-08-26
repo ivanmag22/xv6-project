@@ -519,7 +519,7 @@ getprocinfo(struct pstat* ps){
 }
 
 //pstree
-void pfam_leaf(struct pfam *pf,struct proc *p){
+/*void pfam_leaf(struct pfam *pf,struct proc *p){
   struct pfam x;
   x.pid = p->pid;
   safestrcpy(x.name, p->name, sizeof(p->name));
@@ -530,13 +530,6 @@ void pfam_leaf(struct pfam *pf,struct proc *p){
   cprintf("pfam_leaf - PID: %d\tName: %s\t",p->pid,p->name);
   cprintf("x [pfam_leaf - PID: %d\tName: %s ]\t",x.pid,x.name);
   *pf = x;
-
-  /*pf->pid = p->pid;
-  safestrcpy(pf->name, p->name, sizeof(p->name));
-  cprintf("prova copia stringa\t");
-  pf->parent = p->parent->pid;
-  pf->n_ch = 0;
-  pf->length = 1;*/
 
   cprintf("end pfam_leaf\n");
 }
@@ -584,25 +577,94 @@ walk(struct pfam *pf,struct proc *p,int *flag){
   }
   cprintf("zzzzzzz\n");
   return;
-}
+}*/
 
 int
 getproctree(void){
-  int i,j;//,v[NPROC];
-  struct proc p;
+  int i,j,v[NPROC+1],a[NPROC+1];
+  char name[NPROC+1][16];
 
   acquire(&ptable.lock);
 
-  for(i=NPROC-1; i>0;i--){
-    if(ptable.proc[i].pid>NPROC)
+  for(i=NPROC;i>=0;i--)
+  {
+    a[i]=0;
+  }
+
+  for(i=NPROC-1;i>=0;i--){
+    if(ptable.proc[i].state == UNUSED)
     {
-      //v[i]=-1;
+      v[i]=-1;
+    }
+    else
+    {
+      if(ptable.proc[i].pid == 1)
+      {
+        v[ptable.proc[i].pid]=0;
+      }
+      else
+      {
+        v[ptable.proc[i].pid]=ptable.proc[i].parent->pid;
+        a[ptable.proc[i].parent->pid]++;
+      }
+      safestrcpy(name[ptable.proc[i].pid],ptable.proc[i].name,16);
+    }
+  }
+  v[NPROC]=-1;
+
+  for(i=NPROC;i>0;i--)
+  {
+    if(v[i]>NPROC || v[i]<-1)
+    {
+      v[i]=-1;
+    }
+    if(a[i]>=a[v[i]] && a[i]>1)
+    {
+      a[v[i]]++;
+    }
+  }
+
+  for(i=NPROC;i>0;i--)
+  {
+    if(v[i]!=-1)
+    {
+      j = i;
+      if(a[j]>=0)
+      {
+        while(j>0)
+        {
+          cprintf("[PID: %d Name: %s]\t",j,name[j]);
+          a[j]--;
+          j = v[j];
+          a[j]--;
+          if(j>0)
+          {
+            cprintf("<-\t");
+          }
+          else
+          {
+            cprintf("\n");
+          }
+        }
+      }
+    }
+  }
+
+  /*
+  //VERSIONE ITERATIVA SENZA USO DEI FLAG (TRANNE PER INIT)
+  struct proc p;
+
+  for(i=NPROC-1; i>0;i--){
+    if(ptable.proc[i].state == UNUSED)
+    {
+      //v[i]=-1
       continue;
     }
-    /*if(v[i]==1)
-    {
-      continue;
-    }*/
+    //if(v[i]==1)
+    //{
+    //  continue;
+    //}
+
     p = ptable.proc[i];
     v[i] = 1;
     if(p.state != UNUSED)
@@ -626,8 +688,9 @@ getproctree(void){
         }
       }
     }
-  }
+  }*/
   /*
+  //VERSIONE RICORSIVA CON STRUTTURA IN processInfo.h
   //init
   p = ptable.proc;
 
