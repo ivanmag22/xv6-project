@@ -51,6 +51,10 @@ main(int argc, char *argv[])
       }
       printf(2,"Error: No Process for this PID\n");
     }
+    else
+    {
+      printf(2,"Error: too much arguments\n");
+    }
   }
 
   exit();

@@ -519,98 +519,111 @@ getprocinfo(struct pstat* ps){
 }
 
 //pstree
-/*void pfam_leaf(struct pfam *pf,struct proc *p){
-  struct pfam x;
-  x.pid = p->pid;
-  safestrcpy(x.name, p->name, sizeof(p->name));
-  cprintf("prova copia stringa\t");
-  x.parent = p->parent->pid;
-  x.n_ch = 0;
-  x.length = 1;
-  cprintf("pfam_leaf - PID: %d\tName: %s\t",p->pid,p->name);
-  cprintf("x [pfam_leaf - PID: %d\tName: %s ]\t",x.pid,x.name);
-  *pf = x;
 
-  cprintf("end pfam_leaf\n");
+void
+walk(struct proc *vec,struct proc *v,int index,int pid){
+  int i,j,flag;
+
+  for(i=0,flag=0;i<NPROC;i++)
+  {
+    //cerca, a partire da un processo, i figli e si arriva al caso termine se si arriva al nodo foglia
+    if(vec[i].state!=UNUSED)
+    {
+      if(vec[i].parent->pid == pid)
+      {
+        v[index]=vec[i];
+        cprintf("->\t[PID: %d Name: %s]\t",vec[i].pid,vec[i].name);
+        walk(vec,v,index+1,vec[i].pid);
+        if(vec[i+1].state!=UNUSED){
+          for(j=i+1;j<NPROC;j++)
+          {
+            if(vec[j].parent->pid == pid)
+            {
+              flag=1;
+              break;
+            }
+          }
+          if(flag==1)
+          {
+            cprintf("\n[PID: 1 Name: init]\t");
+            for(j=0;j<index;j++)
+            {
+              cprintf("->\t[PID: %d Name: %s]\t",v[j].pid,v[j].name);
+            }
+            flag=0;
+          }
+        }
+      }
+    }
+  }
+  return;
 }
 
 void
-walk(struct pfam *pf,struct proc *p,int *flag){
-  int i;
-  cprintf("walk - pf->pid: %d\n",pf->pid);
-  if(p->parent->pid == pf->pid)
+walk_prova(int *vec,int *v,int index,int pid){
+  int i,j,flag;
+
+  for(i=0,flag=0;i<NPROC;i++)
   {
-    //cprintf("if-clause - PID: %d\tName: %s\tpf->pid: %d\tpf->n_ch: %d\tsizeof: %d\tsizeof_child: %d\n",p->pid,p->name,pf->pid,pf->n_ch,sizeof *pf,sizeof *(pf->children[i]));
-    i = pf->n_ch;
-
-    pf->n_ch++;
-    pfam_leaf(pf->children[i],p);
-    cprintf("return - PID: %d\tName: %s\tChild: [ i: %d\tpf->children[i]->pid: %d\tpf->children[i]->name: %s ]\n",pf->pid,pf->name,i,pf->children[i]->pid,pf->children[i]->name);
-
-    *flag=1;
-
-    return;
-  }
-  else if(pf->n_ch == 0)
-  {
-    return;
-  }
-
-  for(i=0;i<pf->n_ch;i++)
-  {
-    cprintf("PID: %d\tName: %s\tPF n_ch: i=%d pf->n_ch=%d\n",p->pid,p->name,i,pf->n_ch);
-    if(*flag==0)
+    //cerca, a partire da un processo, i figli e si arriva al caso termine se si arriva al nodo foglia
+    if(vec[i] == pid)
     {
-      walk(pf->children[i],p,flag);
-      cprintf("\txxxxxx\n\tpf->children[i]->pid=%d\n\ti=%d pf->n_ch=%d\n",pf->children[i]->pid,i,pf->n_ch);
-      if(strncmp(p->name,"pstree",4)==0)
-      {
-        cprintf("111111111\n");
-        return;
+      v[index]=i;
+      cprintf("->\t[PID: %d]\t",i);
+      walk_prova(vec,v,index+1,i);
+      if(vec[i+1]!=-1){
+        for(j=i+1;j<NPROC;j++)
+        {
+          if(vec[j] == pid)
+          {
+            flag=1;
+            break;
+          }
+        }
+        if(flag==1)
+        {
+          cprintf("\n[PID: 1]\t");
+          for(j=0;j<index;j++)
+          {
+            cprintf("->\t[PID: %d]\t",v[j]);
+          }
+          flag=0;
+        }
       }
     }
-    else
-    {
-      cprintf("yyyyyyy\n");
-      return;
-    }
   }
-  cprintf("zzzzzzz\n");
   return;
-}*/
+}
 
 int
 getproctree(void){
-  int i,j,v[NPROC+1],a[NPROC+1];
-  char name[NPROC+1][16];
-
   acquire(&ptable.lock);
+  
+  //VERSIONE RICORSIVA
+  struct proc v[NPROC];
 
-  for(i=NPROC;i>=0;i--)
+  cprintf("[PID: %d Name: %s]\t",ptable.proc[0].pid,ptable.proc[0].name);
+
+  walk(ptable.proc,v,0,1);
+
+  cprintf("\n");
+
+  //esempio con più processi figli
+  /*int i,v[NPROC+1],a[NPROC];
+  for(i=0;i<=NPROC;i++)
   {
-    a[i]=0;
+    v[i]=-1;
   }
-
-  for(i=NPROC-1;i>=0;i--){
-    if(ptable.proc[i].state == UNUSED)
-    {
-      v[i]=-1;
-    }
-    else
-    {
-      if(ptable.proc[i].pid == 1)
-      {
-        v[ptable.proc[i].pid]=0;
-      }
-      else
-      {
-        v[ptable.proc[i].pid]=ptable.proc[i].parent->pid;
-        a[ptable.proc[i].parent->pid]++;
-      }
-      safestrcpy(name[ptable.proc[i].pid],ptable.proc[i].name,16);
-    }
-  }
-  v[NPROC]=-1;
+  v[1]=0;
+  v[2]=1;
+  v[3]=1;
+  v[4]=2;
+  v[5]=2;
+  v[6]=3;
+  v[7]=4;
+  v[8]=4;
+  v[9]=4;
+  v[10]=1;
 
   for(i=NPROC;i>0;i--)
   {
@@ -618,52 +631,21 @@ getproctree(void){
     {
       v[i]=-1;
     }
-    if(a[i]>=a[v[i]] && a[i]>1)
-    {
-      a[v[i]]++;
-    }
   }
 
-  for(i=NPROC;i>0;i--)
-  {
-    if(v[i]!=-1)
-    {
-      j = i;
-      if(a[j]>=0)
-      {
-        while(j>0)
-        {
-          cprintf("[PID: %d Name: %s]\t",j,name[j]);
-          a[j]--;
-          j = v[j];
-          a[j]--;
-          if(j>0)
-          {
-            cprintf("<-\t");
-          }
-          else
-          {
-            cprintf("\n");
-          }
-        }
-      }
-    }
-  }
+  cprintf("[PID: 1]\t");
+  walk_prova(v,a,0,1);
+  cprintf("\n");*/
 
-  /*
-  //VERSIONE ITERATIVA SENZA USO DEI FLAG (TRANNE PER INIT)
+  //VERSIONE ITERATIVA
+  /*int i,j,v[NPROC+1];
   struct proc p;
 
   for(i=NPROC-1; i>0;i--){
     if(ptable.proc[i].state == UNUSED)
     {
-      //v[i]=-1
       continue;
     }
-    //if(v[i]==1)
-    //{
-    //  continue;
-    //}
 
     p = ptable.proc[i];
     v[i] = 1;
@@ -684,33 +666,11 @@ getproctree(void){
             cprintf("\n");
           }
           p = ptable.proc[j];
-          //v[j] = 1;
         }
       }
     }
   }*/
-  /*
-  //VERSIONE RICORSIVA CON STRUTTURA IN processInfo.h
-  //init
-  p = ptable.proc;
-
-  pfam_leaf(pf,p);
-
-  p++;
-
-  //other processes
-  for(i=0,j=0,zero=0; p < &ptable.proc[NPROC]; p++,i++,zero=0){//p++ -> p(struct proc OLD) + sizeof(struct proc) -> p (struct proc NEW)
-    if(p->state != UNUSED)
-    {
-      //walk(pf,p,&zero);
-      walktree(ptable.proc,p);
-      j++;
-      cprintf("for() - pf->pid: %d, pf->name: %s\tj: %d\n",pf->pid,pf->name,j);
-    }
-  }
-  cprintf("j: %d\n",j);
-  pf->length = j;
-  */
+  
   release(&ptable.lock);
   return 0;
 }
