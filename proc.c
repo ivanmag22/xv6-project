@@ -609,7 +609,7 @@ getproctree(void){
   cprintf("\n");
 
   //esempio con più processi figli
-  /*int i,v[NPROC+1],a[NPROC];
+  /*int i,v[NPROC+1],a[NPROC];  //i -> indice, v -> vettore dei padri, a -> vettore di memorizzazione dei nodi attraversati
   for(i=0;i<=NPROC;i++)
   {
     v[i]=-1;

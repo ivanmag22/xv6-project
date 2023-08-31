@@ -12,7 +12,14 @@ main(int argc, char *argv[])
   }
   else
   {
-    getproctree();
+    if(argc == 1)
+    {
+      getproctree();
+    }
+    else
+    {
+      printf(2, "Error: too many arguments!\n");
+    }
   }
 
   exit();

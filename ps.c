@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     }
     else
     {
-      printf(2,"Error: too much arguments\n");
+      printf(2,"Error: too many arguments\n");
     }
   }
 

@@ -10,7 +10,6 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct pstat;
-struct pfam;
 
 // bio.c
 void            binit(void);

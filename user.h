@@ -1,7 +1,6 @@
 struct stat;
 struct rtcdate;
 struct pstat;
-struct pfam;
 
 // system calls
 int fork(void);
